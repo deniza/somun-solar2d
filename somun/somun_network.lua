@@ -15,6 +15,8 @@ local incomingBytes = 0
 local outgoingBytes = 0
 local somunStopped = true
 local packetPoolingTimer = nil
+local onConnectCallback = nil
+local onDisconnectCallback = nil
 
 local function processPacket(packet)
   
@@ -131,17 +133,19 @@ local function readPackets()
 end
 
  
-function start( _host, _port )
+function start( _host, _port, _onConnect, _onDisconnect)
 
   if somunStopped == false then
     print("Somun.start() : somun already started! do not start it twice!!")
     return
   end
 
-  print("Somun.start() -> ", host, port)
+  print("Somun.start() -> ", _host, _port)
 
   host = _host
   port = _port
+  onConnectCallback = _onConnect
+  onDisconnectCallback = _onDisconnect
 
   targetPacketLen = 0
   targetHeaderLen = 4
@@ -170,6 +174,10 @@ function start( _host, _port )
 
   Runtime:dispatchEvent({name="sunisnetwork_connectedToServer"})
 
+  if onConnectCallback then
+    onConnectCallback()
+  end
+
 end
 
 function stop(callStackStr)
@@ -189,6 +197,10 @@ function stop(callStackStr)
   socket:close()
 
   somunStopped = true
+
+  if onDisconnectCallback then
+    onDisconnectCallback()
+  end
 
 end
 
