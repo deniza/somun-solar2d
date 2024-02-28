@@ -4,6 +4,20 @@ local widget = require("widget")
 local playerId = 1
 local playerName = "guest"
 local password = "xnof7rwap3ez256k"
+local gameId = 0
+
+local State = {
+    DISCONNECTED = 0,
+    CONNECTED = 1,
+    LOGGED_IN = 2,
+    IN_GAME = 3
+}
+
+local state = State.DISCONNECTED
+local group = display.newGroup()
+
+-- function references
+local setState
 
 local function createButton(label, x, y, callback)
     local button = widget.newButton(
@@ -19,22 +33,33 @@ local function createButton(label, x, y, callback)
     )
     button.x = x
     button.y = y
+
+    group:insert(button)
+
     return button
 end
 
 local function handleConnectButtonEvent(event)
     if ("ended" == event.phase) then        
-        Somun.start("localhost", 16666)
+        Somun.start("localhost", 16666, function()
+            print("connected")
+            setState(State.CONNECTED)
+        end,
+        function()
+            print("disconnected")
+            setState(State.DISCONNECTED)
+        end)
     end
 end
 
 local function handleCreateGuestAccountButtonEvent(event)
     if ("ended" == event.phase) then
-        Somun.account.createGuestAccount(function(params)            
-            playerId = params[1]
-            playerName = params[2]
-            password = params[3]
+        Somun.account.createGuestAccount(function(playerId, playerName, password)
+            playerId = playerId
+            playerName = playerName
+            password = password            
             print("guest account created: ", playerId, playerName, password)
+            setState(State.LOGGED_IN)
         end,
         function()
             print("guest account creation failed")
@@ -49,15 +74,145 @@ local function handleTestButtonEvent(event)
     end
 end
 
-local function handleLoginButtonEvent(event)
+local function handleCreateRandomGameButtonEvent(event)
     if ("ended" == event.phase) then
-        Somun.auth.loginUsingIdPassword(playerId, password, function(params)
-            print("login status: ", params[1])
+        Somun.game.createRandomGame(function(status)
+            if status == 0 then
+                print("random game creation failed")
+            else
+                print("registered to create random game")
+            end
         end)
     end
 end
 
-local connectButton = createButton("Connect", display.contentCenterX, display.contentCenterY, handleConnectButtonEvent)
-local createGuestAccountButton = createButton("Create Guest Account", connectButton.x, connectButton.y + connectButton.height + 10, handleCreateGuestAccountButtonEvent)
-local loginButton = createButton("Login", createGuestAccountButton.x, createGuestAccountButton.y + connectButton.height + 10, handleLoginButtonEvent)
-local sendTestButton = createButton("Test", loginButton.x, loginButton.y + loginButton.height + 10, handleTestButtonEvent)
+local function handleEnterGameButtonEvent(event)
+    if ("ended" == event.phase) then
+        Somun.game.enterGame(gameId, function(status, gameId)
+            if status == 0 then
+                print("game not found: ", gameId)                
+            else
+                print("game entered: ", gameId)
+                setState(State.IN_GAME)
+            end            
+        end)
+    end
+end
+
+local function handleListGamesButtonEvent(event)
+    if ("ended" == event.phase) then
+        Somun.game.listGames(function(games)
+            print("games: ", games)
+            if #games > 0 then
+                gameId = games[1]
+            end
+        end)
+    end
+end
+
+local function handleMakeMoveButtonEvent(event)
+    if ("ended" == event.phase) then
+        Somun.game.makeMove(1, 1, 1, function(status)
+            if status == 0 then
+                print("move failed")
+            else
+                print("move succeeded")
+            end
+        end)
+    end
+end
+
+local function handleExitGameButtonEvent(event)
+    if ("ended" == event.phase) then
+        Somun.game.exitGame(gameId, function(status)
+            if status == 0 then
+                print("exit game failed")
+            else
+                print("exited game")
+                gameId = 0
+                setState(State.LOGGED_IN)
+            end
+        end)
+    end
+end
+
+local function handleLoginButtonEvent(event)
+    if ("ended" == event.phase) then
+        Somun.auth.loginUsingIdPassword(playerId, password, function(status, name)
+            print("login status: ", p1, p2)
+            if  status == 1 then
+                playerName = name
+                setState(State.LOGGED_IN)
+            end
+        end)
+    end
+end
+
+local function handleDisconnectButtonEvent(event)
+    if ("ended" == event.phase) then
+        Somun.stop()
+        setState(State.DISCONNECTED)
+    end
+end
+
+local function renderUI()
+
+    if group ~= nil then
+        group:removeSelf()
+        group = display.newGroup()
+    end
+
+    if state == State.DISCONNECTED then
+        
+        local connectButton = createButton("Connect", display.contentCenterX, display.contentCenterY, handleConnectButtonEvent)
+    
+    elseif state == State.CONNECTED then
+
+        local createGuestAccountButton = createButton("Create Guest Account", display.contentCenterX, display.contentCenterY, handleCreateGuestAccountButtonEvent)
+        local loginButton = createButton("Login", createGuestAccountButton.x, createGuestAccountButton.y + createGuestAccountButton.height + 10, handleLoginButtonEvent)
+        local disconnectButton = createButton("Disconnect", loginButton.x, loginButton.y + loginButton.height + 10, handleDisconnectButtonEvent)
+
+    elseif state == State.LOGGED_IN then
+
+        local sendTestButton = createButton("Test", display.contentCenterX, display.contentCenterY, handleTestButtonEvent)
+        local createRandomGameButton = createButton("Create Random Game", sendTestButton.x, sendTestButton.y + sendTestButton.height + 10, handleCreateRandomGameButtonEvent)
+        local enterGameButton = createButton("Enter Game", createRandomGameButton.x, createRandomGameButton.y + createRandomGameButton.height + 10, handleEnterGameButtonEvent)
+        local listGamesButton = createButton("List Games", enterGameButton.x, enterGameButton.y + enterGameButton.height + 10, handleListGamesButtonEvent)
+        local disconnectButton = createButton("Disconnect", listGamesButton.x, listGamesButton.y + listGamesButton.height + 10, handleDisconnectButtonEvent)
+
+    elseif state == State.IN_GAME then
+
+        local makeMoveButton = createButton("Make Move", display.contentCenterX, display.contentCenterY, handleMakeMoveButtonEvent)
+        local exitGameButton = createButton("Exit Game", makeMoveButton.x, makeMoveButton.y + makeMoveButton.height + 10, handleExitGameButtonEvent)
+        local disconnectButton = createButton("Disconnect", exitGameButton.x, exitGameButton.y + exitGameButton.height + 10, handleDisconnectButtonEvent)
+        
+    
+    end
+
+    local statusText = display.newText({
+        text = "",
+        x = display.contentCenterX,
+        y = display.contentHeight,
+        fontSize = 16,
+        align = "center"
+    })
+    group:insert(statusText)
+
+    if state == State.DISCONNECTED then
+        statusText.text = "Disconnected"
+    elseif state == State.CONNECTED then
+        statusText.text = "Connected"
+    elseif state == State.LOGGED_IN then
+        statusText.text = "Logged In pid: " .. playerId .. " name: " .. playerName
+    elseif state == State.IN_GAME then
+        statusText.text = "In Game pid: " .. playerId .. " name: " .. playerName .. " gameId: " .. gameId
+    end
+
+end
+
+setState = function(newState)
+    state = newState
+    renderUI()
+end
+
+setState(State.DISCONNECTED)
