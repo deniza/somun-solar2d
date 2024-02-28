@@ -14,7 +14,7 @@ local function triggerCallback(callback, params)
     local callback = Somun.callbacks[callback]
 
     if callback ~= nil then
-        callback(params)
+        callback(unpack(params or {}))
     end
     
 end
