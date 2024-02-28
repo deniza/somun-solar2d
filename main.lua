@@ -9,8 +9,9 @@ local gameId = 0
 local State = {
     DISCONNECTED = 0,
     CONNECTED = 1,
-    LOGGED_IN = 2,
-    IN_GAME = 3
+    LOGIN_SCREEN = 2,
+    LOGGED_IN = 3,
+    IN_GAME = 4
 }
 
 local state = State.DISCONNECTED
@@ -28,7 +29,7 @@ local function createButton(label, x, y, callback)
             width = 200,
             height = 40,
             cornerRadius = 2,
-            fillColor = {default = {1, 1, 1, 1}, over = {1, 1, 1, 0.1}},
+            fillColor = {default = {1, 1, 1, 1}, over = {0.4, 0.4, 0.4, 1}},
         }
     )
     button.x = x
@@ -54,10 +55,10 @@ end
 
 local function handleCreateGuestAccountButtonEvent(event)
     if ("ended" == event.phase) then
-        Somun.account.createGuestAccount(function(playerId, playerName, password)
-            playerId = playerId
-            playerName = playerName
-            password = password            
+        Somun.account.createGuestAccount(function(_playerId, _playerName, _password)
+            playerId = _playerId
+            playerName = _playerName
+            password = _password            
             print("guest account created: ", playerId, playerName, password)
             setState(State.LOGGED_IN)
         end,
@@ -136,14 +137,22 @@ local function handleExitGameButtonEvent(event)
     end
 end
 
+local function handleLoginScreenButtonEvent(event)
+    if ("ended" == event.phase) then
+        setState(State.LOGIN_SCREEN)
+    end
+end
+
 local function handleLoginButtonEvent(event)
     if ("ended" == event.phase) then
-        Somun.auth.loginUsingIdPassword(playerId, password, function(status, name)
-            print("login status: ", p1, p2)
-            if  status == 1 then
-                playerName = name
+        Somun.auth.loginUsingIdPassword(playerId, password, function(status, _playerName)            
+            if status == 0 then
+                print("login failed")
+            else
+                playerName = _playerName
+                print("logged in: ", playerName)
                 setState(State.LOGGED_IN)
-            end
+            end            
         end)
     end
 end
@@ -169,7 +178,7 @@ local function renderUI()
     elseif state == State.CONNECTED then
 
         local createGuestAccountButton = createButton("Create Guest Account", display.contentCenterX, display.contentCenterY, handleCreateGuestAccountButtonEvent)
-        local loginButton = createButton("Login", createGuestAccountButton.x, createGuestAccountButton.y + createGuestAccountButton.height + 10, handleLoginButtonEvent)
+        local loginButton = createButton("Login", createGuestAccountButton.x, createGuestAccountButton.y + createGuestAccountButton.height + 10, handleLoginScreenButtonEvent)
         local disconnectButton = createButton("Disconnect", loginButton.x, loginButton.y + loginButton.height + 10, handleDisconnectButtonEvent)
 
     elseif state == State.LOGGED_IN then
@@ -179,6 +188,30 @@ local function renderUI()
         local enterGameButton = createButton("Enter Game", createRandomGameButton.x, createRandomGameButton.y + createRandomGameButton.height + 10, handleEnterGameButtonEvent)
         local listGamesButton = createButton("List Games", enterGameButton.x, enterGameButton.y + enterGameButton.height + 10, handleListGamesButtonEvent)
         local disconnectButton = createButton("Disconnect", listGamesButton.x, listGamesButton.y + listGamesButton.height + 10, handleDisconnectButtonEvent)
+
+    elseif state == State.LOGIN_SCREEN then
+
+        local playerIdInput = native.newTextField( display.contentCenterX, display.contentCenterY, 180, 20 )
+        playerIdInput.placeholder = "playerId"
+        local passwordInput = native.newTextField( display.contentCenterX, playerIdInput.y + playerIdInput.height + 10, 180, 20 )
+        passwordInput.placeholder = "password"
+
+        group:insert(playerIdInput)
+        group:insert(passwordInput)
+
+        local loginButton = createButton("Login", passwordInput.x, passwordInput.y + passwordInput.height + 30, function(event)
+            if ("ended" == event.phase) then
+                playerId = tonumber(playerIdInput.text)
+                password = passwordInput.text
+                handleLoginButtonEvent(event)
+            end
+        end)
+        local backButton = createButton("Cancel", loginButton.x, loginButton.y + loginButton.height + 10, function(event)
+            if ("ended" == event.phase) then
+                setState(State.CONNECTED)
+            end
+        end)
+
 
     elseif state == State.IN_GAME then
 
@@ -202,6 +235,8 @@ local function renderUI()
         statusText.text = "Disconnected"
     elseif state == State.CONNECTED then
         statusText.text = "Connected"
+    elseif state == State.LOGIN_SCREEN then
+        statusText.text = "Login Screen"
     elseif state == State.LOGGED_IN then
         statusText.text = "Logged In pid: " .. playerId .. " name: " .. playerName
     elseif state == State.IN_GAME then
