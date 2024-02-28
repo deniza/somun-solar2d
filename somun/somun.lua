@@ -18,9 +18,9 @@ Somun.player = {
     login = false
 }
 
-function Somun.start(host, port)    
+function Somun.start(host, port, onConnect, onDisconnect)    
     
-    network.start(host, port)
+    network.start(host, port, onConnect, onDisconnect)
 
 end
 
