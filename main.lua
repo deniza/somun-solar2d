@@ -148,6 +148,7 @@ local function handleLoginButtonEvent(event)
         Somun.auth.loginUsingIdPassword(playerId, password, function(status, _playerName)            
             if status == 0 then
                 print("login failed")
+                native.showAlert( "Error", "login failed")
             else
                 playerName = _playerName
                 print("logged in: ", playerName)
@@ -197,8 +198,8 @@ local function renderUI()
 
         local loginButton = createButton("Login", passwordInput.x, passwordInput.y + passwordInput.height + 30, function(event)
             if ("ended" == event.phase) then
-                playerId = tonumber(playerIdInput.text)
-                password = passwordInput.text
+                playerId = tonumber(playerIdInput.text) or 0
+                password = passwordInput.text or ""
                 handleLoginButtonEvent(event)
             end
         end)
