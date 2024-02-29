@@ -77,7 +77,7 @@ end
 
 local function handleCreateRandomGameButtonEvent(event)
     if ("ended" == event.phase) then
-        Somun.game.createRandomGame(function(status)
+        Somun.play.createRandomGame(function(status)
             if status == 0 then
                 print("random game creation failed")
             else
@@ -89,7 +89,7 @@ end
 
 local function handleEnterGameButtonEvent(event)
     if ("ended" == event.phase) then
-        Somun.game.enterGame(gameId, function(status, gameId)
+        Somun.play.enterGame(gameId, function(status, gameId)
             if status == 0 then
                 print("game not found: ", gameId)                
             else
@@ -103,7 +103,6 @@ end
 local function handleListGamesButtonEvent(event)
     if ("ended" == event.phase) then
         Somun.play.listGames(function(games)
-            print("games: ", games)
             if #games > 0 then
                 gameId = games[1]
             end
