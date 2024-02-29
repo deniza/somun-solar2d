@@ -2,9 +2,10 @@ require("somun.somun")
 local widget = require("widget")
 
 local playerId = 1
-local playerName = "guest"
-local password = "xnof7rwap3ez256k"
+local playerName = ""
+local password = ""
 local gameId = 0
+local number = 0
 
 local State = {
     DISCONNECTED = 0,
@@ -112,7 +113,8 @@ end
 
 local function handleMakeMoveButtonEvent(event)
     if ("ended" == event.phase) then
-        Somun.play.makeMove(1, 1, 1, function(status)
+        local moveData = "{'number': " .. number .. "}"
+        Somun.play.makeMove(gameId, moveData, function(status)
             if status == 0 then
                 print("move failed")
             else
@@ -221,7 +223,17 @@ local function renderUI()
 
     elseif state == State.IN_GAME then
 
-        local makeMoveButton = createButton("Make Move", display.contentCenterX, display.contentCenterY, handleMakeMoveButtonEvent)
+        local numberInput = native.newTextField( display.contentCenterX, display.contentCenterY, 180, 20 )
+        numberInput.placeholder = "number"
+
+        group:insert(numberInput)
+
+        local makeMoveButton = createButton("Make Move", display.contentCenterX, numberInput.y + numberInput.height + 30, function(event)
+            if ("ended" == event.phase) then
+                number = tonumber(numberInput.text) or 0
+                handleMakeMoveButtonEvent(event)
+            end
+        end)
         local exitGameButton = createButton("Exit Game", makeMoveButton.x, makeMoveButton.y + makeMoveButton.height + 10, handleExitGameButtonEvent)
         local disconnectButton = createButton("Disconnect", exitGameButton.x, exitGameButton.y + exitGameButton.height + 10, handleDisconnectButtonEvent)
         
@@ -261,4 +273,12 @@ setState(State.DISCONNECTED)
 
 Somun.registerCallback("Play_gameCreated", function(gameId, playerIds, turnOwnerId, stateJson)
     print("game created: ", gameId, playerIds, turnOwnerId, stateJson)
+end)
+
+Somun.registerCallback("Play_gameStateUpdated", function(gameId, stateJson)
+    print("game state updated: ", gameId, stateJson)
+end)
+
+Somun.registerCallback("Play_turnOwnerChanged", function(gameId, turnOwnerId)
+    print("turn owner changed: ", gameId, turnOwnerId)
 end)

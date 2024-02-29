@@ -192,7 +192,7 @@ function Somun.play.makeMove(gameId, moveDataJson, callback)
 
     local params = {
         {"int", gameId},
-        {"string", moveData}
+        {"string", moveDataJson}
     }
     
     callFunction("Play", "makeMove", params)
