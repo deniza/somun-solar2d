@@ -102,7 +102,7 @@ end
 
 local function handleListGamesButtonEvent(event)
     if ("ended" == event.phase) then
-        Somun.game.listGames(function(games)
+        Somun.play.listGames(function(games)
             print("games: ", games)
             if #games > 0 then
                 gameId = games[1]
@@ -113,7 +113,7 @@ end
 
 local function handleMakeMoveButtonEvent(event)
     if ("ended" == event.phase) then
-        Somun.game.makeMove(1, 1, 1, function(status)
+        Somun.play.makeMove(1, 1, 1, function(status)
             if status == 0 then
                 print("move failed")
             else
@@ -125,7 +125,7 @@ end
 
 local function handleExitGameButtonEvent(event)
     if ("ended" == event.phase) then
-        Somun.game.exitGame(gameId, function(status)
+        Somun.play.exitGame(gameId, function(status)
             if status == 0 then
                 print("exit game failed")
             else
