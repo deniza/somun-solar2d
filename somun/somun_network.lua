@@ -238,6 +238,7 @@ end
 function callFunction(funcName,parameters)
 
   print(system.getTimer()*0.001,"somun.callFunction:",funcName)
+  debug_print_function_call(funcName, parameters)
 
   local packet = packetlib.createPacket(funcName,parameters)
   local status,err = socket:send(packet)

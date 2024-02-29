@@ -77,7 +77,7 @@ end
 
 local function handleCreateRandomGameButtonEvent(event)
     if ("ended" == event.phase) then
-        Somun.play.createRandomGame(function(status)
+        Somun.play.createRandomGame(0, function(status)
             if status == 0 then
                 print("random game creation failed")
             else
@@ -129,7 +129,6 @@ local function handleExitGameButtonEvent(event)
                 print("exit game failed")
             else
                 print("exited game")
-                gameId = 0
                 setState(State.LOGGED_IN)
             end
         end)
@@ -259,3 +258,7 @@ setState = function(newState)
 end
 
 setState(State.DISCONNECTED)
+
+Somun.registerCallback("Play_gameCreated", function(gameId, playerIds, turnOwnerId, stateJson)
+    print("game created: ", gameId, playerIds, turnOwnerId, stateJson)
+end)

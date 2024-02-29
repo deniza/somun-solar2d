@@ -49,6 +49,12 @@ function Somun.triggerCallback(callback, params)
 
 end
 
+function Somun.registerCallback(callbackName, callbackFunction)
+    
+    Somun.callbacks[callbackName] = callbackFunction
+    
+end
+
 function Somun.rpc.test(stringParam, intParam)
     
     local params = {
@@ -138,7 +144,7 @@ end
 
 function Somun.play.enterGame(gameId, callback)
     
-    Somun.callbacks["Play_enterGame"] = callback
+    Somun.callbacks["Play_enterGameResponse"] = callback
 
     local params = {
         {"int", gameId}
