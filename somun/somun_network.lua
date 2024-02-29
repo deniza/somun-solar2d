@@ -21,8 +21,16 @@ local onDisconnectCallback = nil
 local function debug_print_function_call(funcName, params)
     
   local output = ""
-  for _, value in pairs(params) do        
-      output = output .. value .. ", "
+  for _, value in pairs(params) do
+      if type(value) == "table" then
+          output = output .. "{"
+          for _,v in pairs(value) do
+              output = output .. v .. ", "
+          end
+          output = output .. "}, "
+      else        
+        output = output .. value .. ", "
+      end
   end
 
   print("["..funcName.."]", output)
