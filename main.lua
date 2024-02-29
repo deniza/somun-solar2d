@@ -21,6 +21,7 @@ local group = display.newGroup()
 
 -- function references
 local setState
+local renderUI
 
 local function createButton(label, x, y, callback, isDisabled)
     local button = widget.newButton(
@@ -113,6 +114,7 @@ local function handleListGamesButtonEvent(event)
         Somun.play.listGames(function(games)
             if #games > 0 then
                 gameId = games[1]
+                renderUI()
             end
         end)
     end
@@ -172,7 +174,7 @@ local function handleDisconnectButtonEvent(event)
     end
 end
 
-local function renderUI()
+renderUI = function()
 
     if group ~= nil then
         group:removeSelf()
@@ -222,7 +224,7 @@ local function renderUI()
 
         local sendTestButton = createButton("Test", display.contentCenterX, display.contentCenterY, handleTestButtonEvent)
         local createRandomGameButton = createButton("Create Random Game", sendTestButton.x, sendTestButton.y + sendTestButton.height + 10, handleCreateRandomGameButtonEvent)
-        local enterGameButton = createButton("Enter Game", createRandomGameButton.x, createRandomGameButton.y + createRandomGameButton.height + 10, handleEnterGameButtonEvent)
+        local enterGameButton = createButton("Enter Game", createRandomGameButton.x, createRandomGameButton.y + createRandomGameButton.height + 10, handleEnterGameButtonEvent, gameId == 0)
         local listGamesButton = createButton("List Games", enterGameButton.x, enterGameButton.y + enterGameButton.height + 10, handleListGamesButtonEvent)
         local disconnectButton = createButton("Disconnect", listGamesButton.x, listGamesButton.y + listGamesButton.height + 10, handleDisconnectButtonEvent)
 
