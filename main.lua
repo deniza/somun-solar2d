@@ -6,6 +6,7 @@ local playerName = ""
 local password = ""
 local gameId = 0
 local number = 0
+local isTurnOwner = false
 
 local State = {
     DISCONNECTED = 0,
@@ -21,7 +22,7 @@ local group = display.newGroup()
 -- function references
 local setState
 
-local function createButton(label, x, y, callback)
+local function createButton(label, x, y, callback, isDisabled)
     local button = widget.newButton(
         {
             label = label,
@@ -31,10 +32,15 @@ local function createButton(label, x, y, callback)
             height = 40,
             cornerRadius = 2,
             fillColor = {default = {1, 1, 1, 1}, over = {0.4, 0.4, 0.4, 1}},
+            isEnabled = not (isDisabled == true)
         }
     )
     button.x = x
     button.y = y
+
+    if isDisabled then
+        button:setFillColor(1, 1, 1, 0.3)
+    end
 
     group:insert(button)
 
@@ -90,11 +96,12 @@ end
 
 local function handleEnterGameButtonEvent(event)
     if ("ended" == event.phase) then
-        Somun.play.enterGame(gameId, function(status, gameId)
+        Somun.play.enterGame(gameId, function(status, turnOwnerId)
             if status == 0 then
                 print("game not found: ", gameId)                
             else
                 print("game entered: ", gameId)
+                isTurnOwner = (turnOwnerId == playerId)
                 setState(State.IN_GAME)
             end            
         end)
@@ -233,7 +240,7 @@ local function renderUI()
                 number = tonumber(numberInput.text) or 0
                 handleMakeMoveButtonEvent(event)
             end
-        end)
+        end, not isTurnOwner)
         local exitGameButton = createButton("Exit Game", makeMoveButton.x, makeMoveButton.y + makeMoveButton.height + 10, handleExitGameButtonEvent)
         local disconnectButton = createButton("Disconnect", exitGameButton.x, exitGameButton.y + exitGameButton.height + 10, handleDisconnectButtonEvent)
         
@@ -281,4 +288,6 @@ end)
 
 Somun.registerCallback("Play_turnOwnerChanged", function(gameId, turnOwnerId)
     print("turn owner changed: ", gameId, turnOwnerId)
+    isTurnOwner = (turnOwnerId == playerId)
+    renderUI()
 end)
