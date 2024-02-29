@@ -7,6 +7,7 @@ local password = ""
 local gameId = 0
 local number = 0
 local isTurnOwner = false
+local gameStatusMessage = ""
 
 local State = {
     DISCONNECTED = 0,
@@ -232,6 +233,15 @@ renderUI = function()
 
     elseif state == State.IN_GAME then
 
+        local gameStatusText = display.newText({
+            text = gameStatusMessage,
+            x = display.contentCenterX,
+            y = 20,
+            fontSize = 16,
+            align = "center"
+        })
+        group:insert(gameStatusText)    
+
         local numberInput = native.newTextField( display.contentCenterX, display.contentCenterY, 180, 20 )
         numberInput.placeholder = "number"
 
@@ -250,25 +260,25 @@ renderUI = function()
     
     end
 
-    local statusText = display.newText({
+    local bottomStatusText = display.newText({
         text = "",
         x = display.contentCenterX,
         y = display.contentHeight,
         fontSize = 16,
         align = "center"
     })
-    group:insert(statusText)
+    group:insert(bottomStatusText)
 
     if state == State.DISCONNECTED then
-        statusText.text = "Disconnected"
+        bottomStatusText.text = "Disconnected"
     elseif state == State.CONNECTED then
-        statusText.text = "Connected"
+        bottomStatusText.text = "Connected"
     elseif state == State.LOGIN_SCREEN then
-        statusText.text = "Login Screen"
+        bottomStatusText.text = "Login Screen"
     elseif state == State.LOGGED_IN then
-        statusText.text = "Logged In pid: " .. playerId .. " name: " .. playerName
+        bottomStatusText.text = "Logged In pid: " .. playerId .. " name: " .. playerName
     elseif state == State.IN_GAME then
-        statusText.text = "In Game pid: " .. playerId .. " name: " .. playerName .. " gameId: " .. gameId
+        bottomStatusText.text = "In Game pid: " .. playerId .. " name: " .. playerName .. " gameId: " .. gameId
     end
 
 end
@@ -286,6 +296,8 @@ end)
 
 Somun.registerCallback("Play_gameStateUpdated", function(gameId, stateJson)
     print("game state updated: ", gameId, stateJson)
+    gameStatusMessage = stateJson
+    renderUI()
 end)
 
 Somun.registerCallback("Play_turnOwnerChanged", function(gameId, turnOwnerId)
