@@ -168,27 +168,23 @@ local function renderUI()
 
     if group ~= nil then
         group:removeSelf()
-        group = display.newGroup()
+        group = display.newGroup()        
     end
 
     if state == State.DISCONNECTED then
         
         local connectButton = createButton("Connect", display.contentCenterX, display.contentCenterY, handleConnectButtonEvent)
     
+        display.setDefault("background", 0.0, 0.0, 0.0)
+
     elseif state == State.CONNECTED then
 
         local createGuestAccountButton = createButton("Create Guest Account", display.contentCenterX, display.contentCenterY, handleCreateGuestAccountButtonEvent)
         local loginButton = createButton("Login", createGuestAccountButton.x, createGuestAccountButton.y + createGuestAccountButton.height + 10, handleLoginScreenButtonEvent)
         local disconnectButton = createButton("Disconnect", loginButton.x, loginButton.y + loginButton.height + 10, handleDisconnectButtonEvent)
 
-    elseif state == State.LOGGED_IN then
-
-        local sendTestButton = createButton("Test", display.contentCenterX, display.contentCenterY, handleTestButtonEvent)
-        local createRandomGameButton = createButton("Create Random Game", sendTestButton.x, sendTestButton.y + sendTestButton.height + 10, handleCreateRandomGameButtonEvent)
-        local enterGameButton = createButton("Enter Game", createRandomGameButton.x, createRandomGameButton.y + createRandomGameButton.height + 10, handleEnterGameButtonEvent)
-        local listGamesButton = createButton("List Games", enterGameButton.x, enterGameButton.y + enterGameButton.height + 10, handleListGamesButtonEvent)
-        local disconnectButton = createButton("Disconnect", listGamesButton.x, listGamesButton.y + listGamesButton.height + 10, handleDisconnectButtonEvent)
-
+        display.setDefault("background", 0.3, 0.3, 0.3)
+        
     elseif state == State.LOGIN_SCREEN then
 
         local playerIdInput = native.newTextField( display.contentCenterX, display.contentCenterY, 180, 20 )
@@ -212,6 +208,17 @@ local function renderUI()
             end
         end)
 
+        display.setDefault("background", 0.3, 0.3, 0.3)
+
+    elseif state == State.LOGGED_IN then
+
+        local sendTestButton = createButton("Test", display.contentCenterX, display.contentCenterY, handleTestButtonEvent)
+        local createRandomGameButton = createButton("Create Random Game", sendTestButton.x, sendTestButton.y + sendTestButton.height + 10, handleCreateRandomGameButtonEvent)
+        local enterGameButton = createButton("Enter Game", createRandomGameButton.x, createRandomGameButton.y + createRandomGameButton.height + 10, handleEnterGameButtonEvent)
+        local listGamesButton = createButton("List Games", enterGameButton.x, enterGameButton.y + enterGameButton.height + 10, handleListGamesButtonEvent)
+        local disconnectButton = createButton("Disconnect", listGamesButton.x, listGamesButton.y + listGamesButton.height + 10, handleDisconnectButtonEvent)
+
+        display.setDefault("background", 0.2, 0.2, 0.5)
 
     elseif state == State.IN_GAME then
 
@@ -219,6 +226,7 @@ local function renderUI()
         local exitGameButton = createButton("Exit Game", makeMoveButton.x, makeMoveButton.y + makeMoveButton.height + 10, handleExitGameButtonEvent)
         local disconnectButton = createButton("Disconnect", exitGameButton.x, exitGameButton.y + exitGameButton.height + 10, handleDisconnectButtonEvent)
         
+        display.setDefault("background", 0.2, 0.5, 0.2)
     
     end
 
