@@ -98,12 +98,13 @@ end
 
 local function handleEnterGameButtonEvent(event)
     if ("ended" == event.phase) then
-        Somun.play.enterGame(gameId, function(status, turnOwnerId)
+        Somun.play.enterGame(gameId, function(status, isCompleted, turnOwnerId, winnerId, stateJson)
             if status == 0 then
                 print("game not found: ", gameId)                
             else
                 print("game entered: ", gameId)
                 isTurnOwner = (turnOwnerId == playerId)
+                gameStatusMessage = stateJson
                 setState(State.IN_GAME)
             end            
         end)
@@ -290,8 +291,14 @@ end
 
 setState(State.DISCONNECTED)
 
-Somun.registerCallback("Play_gameCreated", function(gameId, playerIds, turnOwnerId, stateJson)
-    print("game created: ", gameId, playerIds, turnOwnerId, stateJson)
+Somun.registerCallback("Play_gameCreated", function(_gameId, playerIds, turnOwnerId, stateJson)
+    print("game created: ", _gameId, playerIds, turnOwnerId, stateJson)
+    if state == State.LOGGED_IN then
+        gameId = _gameId
+        isTurnOwner = (turnOwnerId == playerId)
+        gameStatusMessage = stateJson
+        renderUI()
+    end
 end)
 
 Somun.registerCallback("Play_gameStateUpdated", function(gameId, stateJson)
@@ -303,5 +310,12 @@ end)
 Somun.registerCallback("Play_turnOwnerChanged", function(gameId, turnOwnerId)
     print("turn owner changed: ", gameId, turnOwnerId)
     isTurnOwner = (turnOwnerId == playerId)
+    renderUI()
+end)
+
+Somun.registerCallback("Play_gameFinished", function(gameId, winnerId, stateJson)
+    print("game finished: ", gameId, winnerId, stateJson)
+    gameStatusMessage = stateJson
+    isTurnOwner = false
     renderUI()
 end)
