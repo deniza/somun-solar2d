@@ -18,20 +18,39 @@ local packetPoolingTimer = nil
 local onConnectCallback = nil
 local onDisconnectCallback = nil
 
+local function debug_print_function_call(funcName, params)
+    
+  local output = ""
+  for _, value in pairs(params) do        
+      output = output .. value .. ", "
+  end
+
+  print("["..funcName.."]", output)
+  
+end
+
 local function processPacket(packet)
   
   local funcName, parameters = packetlib.parse(packet)
   
-  print(system.getTimer()*0.001,"incoming packet",funcName,incomingBytes,outgoingBytes)
+  --print(system.getTimer()*0.001,"incoming packet",funcName,incomingBytes,outgoingBytes)
   
   --if not RELEASE_BUILD then
   --  util.binaryDump(packet)  
   --end
+
+  debug_print_function_call(funcName, parameters)
   
-  if Somun[funcName] ~= nil then
-    Somun[funcName](parameters)
-  else
-    print("UNDEFINED FUNCTION CALLED FROM SOMUN SERVER: ", funcName)
+  local callbackFound = Somun.triggerCallback(funcName, parameters)
+
+  if callbackFound == false then
+
+    if Somun[funcName] ~= nil then
+      Somun[funcName](parameters)
+    else
+      print("UNDEFINED FUNCTION CALLED FROM SOMUN SERVER: ", funcName)
+    end      
+
   end
   
 end

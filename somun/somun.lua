@@ -36,6 +36,19 @@ local function callFunction(moduleName, funcName, params)
     
 end
 
+function Somun.triggerCallback(callback, params)
+
+    local callback = Somun.callbacks[callback]
+
+    if callback ~= nil then
+        callback(unpack(params or {}))
+        return true
+    end
+    
+    return false
+
+end
+
 function Somun.rpc.test(stringParam, intParam)
     
     local params = {
