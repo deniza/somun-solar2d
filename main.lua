@@ -226,7 +226,7 @@ renderUI = function()
 
         local sendTestButton = createButton("Test", display.contentCenterX, display.contentCenterY, handleTestButtonEvent)
         local createRandomGameButton = createButton("Create Random Game", sendTestButton.x, sendTestButton.y + sendTestButton.height + 10, handleCreateRandomGameButtonEvent)
-        local enterGameButton = createButton("Enter Game", createRandomGameButton.x, createRandomGameButton.y + createRandomGameButton.height + 10, handleEnterGameButtonEvent, gameId == 0)
+        local enterGameButton = createButton("Enter Game ("..gameId..")", createRandomGameButton.x, createRandomGameButton.y + createRandomGameButton.height + 10, handleEnterGameButtonEvent, gameId == 0)
         local listGamesButton = createButton("List Games", enterGameButton.x, enterGameButton.y + enterGameButton.height + 10, handleListGamesButtonEvent)
         local disconnectButton = createButton("Disconnect", listGamesButton.x, listGamesButton.y + listGamesButton.height + 10, handleDisconnectButtonEvent)
 
