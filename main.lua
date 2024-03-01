@@ -1,3 +1,12 @@
+--[[
+    This is a sample application that demonstrates how to use the Somun library.
+    The application is a simple game client that connects to a Somun server and
+    allows the user to create a guest account, login, create a random game, enter
+    a game, make a move, and exit the game. The application also listens to game
+    events such as game created, game state updated, turn owner changed, and game
+    finished.
+]]--
+
 require("somun.somun")
 local widget = require("widget")
 
